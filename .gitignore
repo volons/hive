@@ -1,0 +1,9 @@
+log_device*
+*.log
+rpi-tools/
+rpi-tools
+build/
+gate
+database/
+main
+conf/
