@@ -14,6 +14,6 @@ RUN go build main.go
 
 FROM gcr.io/distroless/base
 
-COPY --from=build /src/main /
+COPY --from=build /app/main /
 
 CMD [ "/main" ]
