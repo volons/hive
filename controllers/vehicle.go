@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/volons/hive/libs/db"
 	"github.com/volons/hive/libs/websocket"
 	"github.com/volons/hive/models"
 	"github.com/volons/hive/nodes/vehicle"
