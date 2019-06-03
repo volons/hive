@@ -4,7 +4,7 @@ RUN apt-get update && \
 	apt-get install -y git build-essential && \
 	rm -rf /var/lib/apt/lists/*
 
-COPY ./src /app
+COPY ./ /app
 
 WORKDIR /app
 RUN go build main.go
