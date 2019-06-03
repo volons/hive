@@ -36,10 +36,10 @@ func Vehicle(wsclient *websocket.Client, r *http.Request) *websocket.Error {
 func authenticateVehicle(token string, client *websocket.Client) (*models.Vehicle, error) {
 	var vehicle models.Vehicle
 
-	err := db.Get("vehicle:"+token, &vehicle)
-	if err != nil && !db.IsNotFoudError(err) {
-		return nil, err
-	}
+	//err := db.Get("vehicle:"+token, &vehicle)
+	//if err != nil && !db.IsNotFoudError(err) {
+	//	return nil, err
+	//}
 
 	return &vehicle, nil
 }

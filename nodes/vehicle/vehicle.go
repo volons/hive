@@ -38,32 +38,7 @@ func New(ch messages.Channel) *Vehicle {
 func (v *Vehicle) Start(id string, vehicle *models.Vehicle) {
 	v.vehicle = vehicle
 
-	if v.vehicle == nil {
-		cb := callback.New()
-		v.Send(messages.NewRequest("info", nil, cb))
-		val, err := cb.Timeout(time.Minute).Wait()
-		if err != nil {
-			log.Println(err)
-			v.Disconnect()
-			return
-		}
-
-		var vehicle models.Vehicle
-		err = mapstructure.Decode(val, &vehicle)
-		if err != nil {
-			log.Println(err)
-			v.Disconnect()
-			return
-		}
-
-		vehicle.ID = id
-		v.vehicle = &vehicle
-
-		err = db.Set("vehicle:"+id, vehicle)
-		if err != nil {
-			log.Println("Could not save new vehicle", err)
-		}
-	}
+	v.getInfo(id)
 
 	ap := autopilot.Get(v.vehicle.ID)
 	ap.ConnectVehicle(v.autopilot)
@@ -73,6 +48,33 @@ func (v *Vehicle) Start(id string, vehicle *models.Vehicle) {
 
 	v.alive = time.NewTicker(time.Second * 2)
 	v.run()
+}
+
+func (v *Vehicle) getInfo(id string) {
+	cb := callback.New()
+	v.Send(messages.NewRequest("info", nil, cb))
+	val, err := cb.Timeout(time.Minute).Wait()
+	if err != nil {
+		log.Println(err)
+		v.Disconnect()
+		return
+	}
+
+	var vehicle models.Vehicle
+	err = mapstructure.Decode(val, &vehicle)
+	if err != nil {
+		log.Println(err)
+		v.Disconnect()
+		return
+	}
+
+	vehicle.ID = id
+	v.vehicle = &vehicle
+
+	err = db.Set("vehicle:"+id, vehicle)
+	if err != nil {
+		log.Println("Could not save new vehicle", err)
+	}
 }
 
 func (v *Vehicle) run() {
