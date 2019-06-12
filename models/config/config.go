@@ -15,7 +15,7 @@ type Config struct {
 // Init conf with defaults
 var _conf = Config{
 	VolonsPlatform: "", //"https://api.volons.fr/gcs",
-	HTTPAddr:       "0.0.0.0:8081",
+	HTTPAddr:       "0.0.0.0:8656",
 	Database:       "./database/",
 }
 
