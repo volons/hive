@@ -39,8 +39,22 @@ func (v vehicleList) Disconnected(vehicleID string) {
 	v.Publish(nil)
 }
 
+func (v vehicleList) SetStatus(vehicleID string, status *models.Status) {
+	err := db.Set(v.statusKey(vehicleID), *status)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
 func (v vehicleList) SetPosition(vehicleID string, pos *models.Position) {
-	err := db.Set(v.positionKey(vehicleID), pos)
+	err := db.Set(v.positionKey(vehicleID), *pos)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func (v vehicleList) SetBattery(vehicleID string, batt *models.Battery) {
+	err := db.Set(v.batteryKey(vehicleID), *batt)
 	if err != nil {
 		log.Println(err)
 	}
@@ -95,8 +109,92 @@ func (v vehicleList) JSON() libs.JSONObject {
 	//return list
 }
 
-func (v vehicleList) PositionsJSON(t time.Time) (libs.JSONObject, int) {
-	return libs.JSONObject{}, 0
+type Telemetry struct {
+	Status models.Status `json:"status"`
+	Position models.Position `json:"position"`
+	Battery models.Battery `json:"battery"`
+}
+
+func (v vehicleList) TelemetryJSON(t time.Time) (map[string]Telemetry) {
+	out := make(map[string]Telemetry)
+
+	getStatuses(t, out)
+	getPositions(t, out)
+	getBatteries(t, out)
+
+	return out
+}
+
+func getStatuses(t time.Time, out map[string]Telemetry) {
+	keys, err := db.Find(statusPrefix)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	for _, key := range keys {
+		var status models.Status
+		err := db.Get(key, &status)
+		if err != nil {
+			log.Println(err)
+		} else {
+			id := key[len(statusPrefix):]
+			if val, ok := out[id]; ok {
+				val.Status = status
+				out[id] = val
+			} else {
+				out[id] = Telemetry{Status:status}
+			}
+		}
+	}
+}
+
+func getPositions(t time.Time, out map[string]Telemetry) {
+	keys, err := db.Find(positionPrefix)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	for _, key := range keys {
+		var pos models.Position
+		err := db.Get(key, &pos)
+		if err != nil {
+			log.Println(err)
+		} else {
+			id := key[len(positionPrefix):]
+			if val, ok := out[id]; ok {
+				val.Position = pos
+				out[id] = val
+			} else {
+				out[id] = Telemetry{Position:pos}
+			}
+		}
+	}
+}
+
+func getBatteries(t time.Time, out map[string]Telemetry) {
+	keys, err := db.Find(batteryPrefix)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	for _, key := range keys {
+		var batt models.Battery
+		err := db.Get(key, &batt)
+		if err != nil {
+			log.Println(err)
+		} else {
+			id := key[len(batteryPrefix):]
+			if val, ok := out[id]; ok {
+				val.Battery = batt
+				out[id] = val
+			} else {
+				out[id] = Telemetry{Battery:batt}
+			}
+		}
+	}
 }
 
 //GetIDs returns ths IDs of all vehicles in this list
@@ -117,6 +215,17 @@ func (v vehicleList) connectionKey(vehicleID string) string {
 	return fmt.Sprintf("vehicle:connected:%s", vehicleID)
 }
 
+var statusPrefix = "vehicle:status:"
+func (v vehicleList) statusKey(vehicleID string) string {
+	return fmt.Sprintf("%s%s", statusPrefix, vehicleID)
+}
+
+var positionPrefix = "vehicle:position:"
 func (v vehicleList) positionKey(vehicleID string) string {
-	return fmt.Sprintf("vehicle:position:%s", vehicleID)
+	return fmt.Sprintf("%s%s", positionPrefix, vehicleID)
+}
+
+var batteryPrefix = "vehicle:battery:"
+func (v vehicleList) batteryKey(vehicleID string) string {
+	return fmt.Sprintf("%s%s", batteryPrefix, vehicleID)
 }

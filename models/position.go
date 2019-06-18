@@ -109,7 +109,7 @@ func (pos Position) Translate(x float64, y float64, z float64) Position {
 	return out
 }
 
-// Diff calculates the diff between to position
+// Diff calculates the diff between two positions
 func (pos Position) Diff(p2 Position) (float64, float64, float64) {
 	dx := p2.Lon - pos.Lon
 	dy := p2.Lat - pos.Lat
@@ -133,7 +133,7 @@ func (pos Position) Diff(p2 Position) (float64, float64, float64) {
 	return x, y, dz
 }
 
-// Distance calculates the distance between to position
+// Distance calculates the distance between two positions
 func (pos Position) Distance(p2 Position) float64 {
 	x, y, z := pos.Diff(p2)
 	return math.Sqrt(math.Sqrt(x*x+y*y) + z*z)

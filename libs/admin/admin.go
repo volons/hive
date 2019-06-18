@@ -23,7 +23,7 @@ type Admin struct {
 	ch                messages.Channel
 	admin             *models.Admin
 	channels          map[string]*messages.Line
-	lastSentPositions time.Time
+	lastSentTelemetry time.Time
 }
 
 // New creates a new admin
@@ -59,7 +59,7 @@ func (a *Admin) Start(admin *models.Admin, err error) {
 
 	a.onPlatformStatus(platform.Platform.GetStatus())
 	a.onVehicleListChanged()
-	a.sendPositions()
+	a.sendTelemetry()
 
 	a.run()
 }
@@ -68,8 +68,8 @@ func (a *Admin) run() {
 	vehiclesSub := store.Vehicles.Subscription()
 	defer store.Vehicles.Unsubscribe(vehiclesSub)
 
-	positionsSub := time.NewTicker(time.Millisecond * 200)
-	defer positionsSub.Stop()
+	telemetrySub := time.NewTicker(time.Millisecond * 800)
+	defer telemetrySub.Stop()
 
 	usersSub := store.Users.Subscription()
 	defer store.Users.Unsubscribe(usersSub)
@@ -87,8 +87,8 @@ func (a *Admin) run() {
 
 		case <-vehiclesSub.Recv():
 			a.onVehicleListChanged()
-		case <-positionsSub.C:
-			a.sendPositions()
+		case <-telemetrySub.C:
+			a.sendTelemetry()
 		case <-usersSub.Recv():
 			a.onUsersChanged()
 		case <-queueSub.Recv():
@@ -149,14 +149,14 @@ func (a *Admin) onVehicleListChanged() {
 	}
 }
 
-func (a *Admin) sendPositions() {
-	pos, len := store.Vehicles.PositionsJSON(a.lastSentPositions)
-	if len > 0 {
-		err := a.ch.Send(messages.New("positions", pos))
+func (a *Admin) sendTelemetry() {
+	pos := store.Vehicles.TelemetryJSON(a.lastSentTelemetry)
+	if len(pos) > 0 {
+		err := a.ch.Send(messages.New("telemetry", pos))
 		if err != nil {
 			log.Println(err)
 		} else {
-			a.lastSentPositions = time.Now()
+			a.lastSentTelemetry = time.Now()
 		}
 	}
 }

@@ -76,6 +76,8 @@ func main() {
 			return &models.Position{}
 		case "battery":
 			return &models.Battery{}
+		case "status":
+			return &models.Status{}
 		case "rc":
 			return &models.Rc{}
 		case "fence":
