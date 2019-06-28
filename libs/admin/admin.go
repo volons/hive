@@ -9,6 +9,7 @@ import (
 
 	"github.com/volons/hive/libs"
 	"github.com/volons/hive/libs/autopilot"
+	"github.com/volons/hive/libs/callback"
 	"github.com/volons/hive/libs/store"
 	"github.com/volons/hive/messages"
 	"github.com/volons/hive/models"
@@ -275,7 +276,7 @@ func (a *Admin) openChannel(msg messages.Message) (interface{}, error) {
 			return nil, fmt.Errorf("unknown vehicle with ID '%s'", id)
 		}
 
-		line := messages.NewLine(true)
+		line := messages.NewLine("channel:" + channelID, true)
 		ap.ConnectUser(line)
 		a.channels[channelID] = line
 
@@ -327,12 +328,33 @@ func (a *Admin) sendOnChannel(msg messages.Message) (interface{}, error) {
 	}
 
 	d, _ := message.GetObj("data")
+	v, _ := message.GetString("verb")
 
-	m := messages.New(t, d)
+	var m messages.Message
+	var cb *callback.Callback
+	if v == "req" {
+		cb = callback.New()
+		m = messages.NewRequest(t, d, cb)
+	} else {
+		m = messages.New(t, d)
+	}
+
 	line := a.channels[channelID]
+	if line == nil {
+		return nil, fmt.Errorf("Channel %v not found", channelID)
+	}
 
 	log.Printf("Sending message on channel: %v", channelID)
-	return nil, line.Send(m)
+	err := line.Send(m)
+	if err != nil {
+		return nil, err
+	}
+
+	if cb != nil {
+		return cb.Timeout(time.Minute).Wait()
+	}
+
+	return nil, nil
 }
 
 func (a *Admin) closeChannel(msg messages.Message) (interface{}, error) {

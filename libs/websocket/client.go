@@ -115,7 +115,7 @@ func (client *Client) onMessage(json []byte) {
 	select {
 	case client.incoming <- msg:
 	case <-time.After(time.Second):
-		log.Println("message timed out")
+		log.Println("message timed out", msg)
 	}
 }
 
@@ -134,11 +134,9 @@ func (client *Client) onReply(msg messages.Message) {
 
 	cb := client.callbacks.Get(id)
 	if cb == nil {
-		log.Println("received reply for timed out or non existent request")
+		log.Println("received reply for timed out or non existent request", msg)
 		return
 	}
-
-	log.Println("onReply:", data)
 
 	if err, ok := data.GetString("error"); ok {
 		cb.Reject(errors.New(err))
@@ -241,7 +239,7 @@ func (client *Client) sendMessage(data string) error {
 	case <-client.done:
 		return errors.New("Connection closed")
 	case <-time.After(time.Millisecond * 10):
-		log.Println("Message discarded not sent within 10ms")
+		log.Println("Message discarded not sent within 10ms", data)
 		return errors.New("Message discarded not sent within 10ms")
 	}
 }

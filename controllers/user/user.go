@@ -22,7 +22,6 @@ type User struct {
 func NewUserController(ch messages.Channel) *User {
 	u := &User{
 		Channel:   ch,
-		autopilot: messages.NewLine(true),
 	}
 
 	return u
@@ -36,6 +35,7 @@ func (u *User) Start(user *models.User, err error) {
 		return
 	}
 
+	u.autopilot = messages.NewLine("user:" + user.ID(), true)
 	u.user = user
 
 	ap := autopilot.Get(user.VehicleID())

@@ -28,7 +28,6 @@ type Vehicle struct {
 func New(ch messages.Channel) *Vehicle {
 	v := &Vehicle{
 		Channel:   ch,
-		autopilot: messages.NewLine(true),
 	}
 
 	return v
@@ -36,6 +35,7 @@ func New(ch messages.Channel) *Vehicle {
 
 // Start initializes a vehicle connection and starts listening to events
 func (v *Vehicle) Start(id string, vehicle *models.Vehicle) {
+	v.autopilot = messages.NewLine("vehicle:" + id, true)
 	v.vehicle = vehicle
 
 	v.getInfo(id)

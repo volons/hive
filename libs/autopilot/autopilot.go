@@ -1,6 +1,7 @@
 package autopilot
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -47,9 +48,9 @@ func Get(vehicleID string) *Autopilot {
 
 	// if new init autopilot
 	//ap.Dispatcher = dispatcher.Get(vehicleID)
-	ap.vehicle = messages.NewLine(false)
-	ap.user = messages.NewLine(false)
-	ap.admin = messages.NewLine(false)
+	ap.vehicle = messages.NewLine(fmt.Sprintf("autopilot:%v:vehicle", vehicleID), false)
+	ap.user = messages.NewLine(fmt.Sprintf("autopilot:%v:user", vehicleID), false)
+	ap.admin = messages.NewLine(fmt.Sprintf("autopilot:%v:admin", vehicleID), false)
 	ap.manualRc = models.NewNullRc()
 	ap.nullRc = models.NewNullRc()
 	ap.overridingRc = &libs.AtomicBool{}
@@ -65,14 +66,23 @@ func (ap *Autopilot) run() {
 	for {
 		select {
 		case msg := <-ap.vehicle.Recv():
+			libs.TMP = "handling vehicle message"
 			ap.handleVehicleMessage(msg)
+			libs.TMP = "handled vehicle message"
 		case msg := <-ap.user.Recv():
+			libs.TMP = "handling user message"
 			ap.handleUserMessage(msg)
+			libs.TMP = "handled user message"
 		case msg := <-ap.admin.Recv():
+			libs.TMP = "handling admin message"
 			ap.handleAdminMessage(msg)
+			libs.TMP = "handled admin message"
 		case <-ap.rcTicker:
+			libs.TMP = "sending rc"
 			ap.vehicle.Send(messages.New("rc", ap.GetRc()))
+			libs.TMP = "rc sent"
 		case <-ap.Done():
+			libs.TMP = "autopilot done"
 			ap.stop()
 			return
 		}
