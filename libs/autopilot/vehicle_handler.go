@@ -1,6 +1,8 @@
 package autopilot
 
 import (
+	"time"
+
 	"github.com/volons/hive/libs/store"
 	"github.com/volons/hive/messages"
 	"github.com/volons/hive/models"
@@ -36,6 +38,7 @@ func (ap *Autopilot) onPositionMessage(msg messages.Message) {
 		return
 	}
 
+	pos.Timestamp = time.Now()
 	store.Vehicles.SetPosition(ap.vehicleID, pos)
 
 	if ap.fence != nil {

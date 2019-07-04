@@ -113,6 +113,11 @@ type Telemetry struct {
 	Status models.Status `json:"status"`
 	Position models.Position `json:"position"`
 	Battery models.Battery `json:"battery"`
+	Timestamp time.Time `json:"timestamp"`
+}
+
+func NewTelemetry() Telemetry {
+	return Telemetry{Timestamp: time.Now()}
 }
 
 func (v vehicleList) TelemetryJSON(t time.Time) (map[string]Telemetry) {
@@ -139,12 +144,14 @@ func getStatuses(t time.Time, out map[string]Telemetry) {
 			log.Println(err)
 		} else {
 			id := key[len(statusPrefix):]
-			if val, ok := out[id]; ok {
-				val.Status = status
-				out[id] = val
-			} else {
-				out[id] = Telemetry{Status:status}
+
+			val, ok := out[id];
+			if !ok {
+				val = NewTelemetry()
 			}
+
+			val.Status = status
+			out[id] = val
 		}
 	}
 }
@@ -163,12 +170,14 @@ func getPositions(t time.Time, out map[string]Telemetry) {
 			log.Println(err)
 		} else {
 			id := key[len(positionPrefix):]
-			if val, ok := out[id]; ok {
-				val.Position = pos
-				out[id] = val
-			} else {
-				out[id] = Telemetry{Position:pos}
+
+			val, ok := out[id];
+			if !ok {
+				val = NewTelemetry()
 			}
+
+			val.Position = pos
+			out[id] = val
 		}
 	}
 }
@@ -187,12 +196,14 @@ func getBatteries(t time.Time, out map[string]Telemetry) {
 			log.Println(err)
 		} else {
 			id := key[len(batteryPrefix):]
-			if val, ok := out[id]; ok {
-				val.Battery = batt
-				out[id] = val
-			} else {
-				out[id] = Telemetry{Battery:batt}
+
+			val, ok := out[id];
+			if !ok {
+				val = NewTelemetry()
 			}
+
+			val.Battery = batt
+			out[id] = val
 		}
 	}
 }
