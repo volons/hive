@@ -44,7 +44,7 @@ func main() {
 	fence := models.FenceData{}
 	err = db.Get("fence", &fence)
 	if err != nil {
-		log.Printf("Cound not get fence: %v", err)
+		log.Printf("Cannot get fence: %v", err)
 	} else {
 		err = models.SetFence(fence)
 		if err != nil {

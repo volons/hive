@@ -238,8 +238,8 @@ func (client *Client) sendMessage(data string) error {
 		return nil
 	case <-client.done:
 		return errors.New("Connection closed")
-	case <-time.After(time.Millisecond * 10):
-		log.Println("Message discarded not sent within 10ms", data)
+	case <-time.After(time.Millisecond * 100):
+		log.Println("Message discarded not sent within 100ms", data)
 		return errors.New("Message discarded not sent within 10ms")
 	}
 }

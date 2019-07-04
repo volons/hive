@@ -104,9 +104,9 @@ func (l *Line) Send(msg Message) error {
 func (l *Line) Push(msg Message) error {
 	select {
 	case l.receive <- msg:
-	case <-time.After(time.Millisecond * 10):
+	case <-time.After(time.Millisecond * 100):
 		log.Println(libs.TMP)
-		log.Printf("Message discarded, not read within 10ms on line %v", l.Name)
+		log.Printf("Message discarded, not read within 100ms on line %v", l.Name)
 		log.Println(msg)
 		return errors.New("Message discarded, not read within 10ms")
 	case <-l.Done():
