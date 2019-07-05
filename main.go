@@ -65,9 +65,9 @@ func main() {
 	router := mux.NewRouter()
 
 	// Default page
-	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.NotFound(w, r)
-	})
+	//router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	//	http.NotFound(w, r)
+	//})
 
 	// Init vehicle websocket listener
 	vehicleWS := websocket.NewServer(messages.NewParser(func(typ string) interface{} {
@@ -141,6 +141,10 @@ func main() {
 	//vehicles.NewDummyVehicle("127.0.0.1:12345")
 
 	//http.ListenAndServe(conf.HTTPAddr, corsHandler)
+
+	// Serve monitor
+	fs := http.FileServer(http.Dir("./public"))
+	router.Handle("/{rest}", fs)
 
 	log.Printf("Listening on %s\n", conf.HTTPAddr)
 	err = http.ListenAndServe(conf.HTTPAddr, router)
